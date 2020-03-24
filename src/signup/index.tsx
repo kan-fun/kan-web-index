@@ -8,7 +8,8 @@ import {
     Input,
     Button,
     Row,
-    Col
+    Col,
+    Alert
 } from 'antd';
 
 const ENDPOINT = "http://58b5dd3da8514f30a8dfbf42bb0a740c-cn-beijing.alicloudapi.com";
@@ -20,12 +21,12 @@ const headers = {
 }
 
 type Props = {};
-type State = { email_property: string, token_property: string };
+type State = { email_property: string, token_property: string, error_property: boolean };
 
 class Signup extends React.Component<Props, State> {
     constructor(props: any) {
         super(props)
-        this.state = { email_property: '', token_property: '' };
+        this.state = { email_property: '', token_property: '', error_property: false };
     }
 
     send_email_code = async () => {
@@ -46,8 +47,14 @@ class Signup extends React.Component<Props, State> {
             ...headers,
             'X-Token': this.state.token_property
         }
-        const resp = await axios.post(signup_url, body, { headers: signup_headers })
-        localStorage.setItem("token", resp.data.token);
+
+        try {
+            const resp = await axios.post(signup_url, body, { headers: signup_headers });
+            localStorage.setItem("token", resp.data.token);
+        } catch (error) {
+            this.setState({ error_property: true })
+            console.log(error)
+        }
     }
 
     onFinishFailed(values: any) {
@@ -56,57 +63,61 @@ class Signup extends React.Component<Props, State> {
 
     render() {
         return (
-            <Form
-                name="basic"
-                onFinish={this.onFinish}
-                onFinishFailed={this.onFinishFailed}
-            >
-                <Form.Item
-                    name="email"
-                    rules={[
-                        {
-                            type: 'email',
-                            message: '邮箱格式错误，请检查',
-                        },
-                        {
-                            required: true,
-                            message: '邮箱不能为空',
-                        },
-                    ]}
+            <div>
+                {this.state.error_property ? <div><Alert message="验证码错误" type="error" showIcon /><br /></div> : null}
+                <Form
+                    name="basic"
+                    onFinish={this.onFinish}
+                    onFinishFailed={this.onFinishFailed}
                 >
-                    <Input onChange={this.onEmailChange} placeholder="输入邮箱，作为登陆账号" />
-                </Form.Item>
+                    <Form.Item
+                        name="email"
+                        rules={[
+                            {
+                                type: 'email',
+                                message: '邮箱格式错误，请检查',
+                            },
+                            {
+                                required: true,
+                                message: '邮箱不能为空',
+                            },
+                        ]}
+                    >
+                        <Input onChange={this.onEmailChange} placeholder="输入邮箱，作为登陆账号" />
+                    </Form.Item>
 
-                <Form.Item
-                    name="password"
-                    rules={[{ required: true, message: '密码不能为空' }]}
-                >
-                    <Input.Password placeholder="输入账号密码" />
-                </Form.Item>
+                    <Form.Item
+                        name="password"
+                        rules={[{ required: true, message: '密码不能为空' }]}
+                    >
+                        <Input.Password placeholder="输入账号密码" />
+                    </Form.Item>
 
-                <Form.Item>
-                    <Row>
-                        <Col span={20}>
-                            <Form.Item
-                                name="code"
-                                noStyle
-                                rules={[{ required: true, message: '验证码不能为空' }]}
-                            >
-                                <Input placeholder="输入邮件验证码" />
-                            </Form.Item>
-                        </Col>
-                        <Col offset={1} span={3}>
-                            <Button onClick={this.send_email_code} block>获取验证码</Button>
-                        </Col>
-                    </Row>
-                </Form.Item>
+                    <Form.Item>
+                        <Row>
+                            <Col span={20}>
+                                <Form.Item
+                                    name="code"
+                                    noStyle
+                                    rules={[{ required: true, message: '验证码不能为空' }]}
+                                >
+                                    <Input placeholder="输入邮件验证码" />
+                                </Form.Item>
+                            </Col>
+                            <Col offset={1} span={3}>
+                                <Button onClick={this.send_email_code} block>获取验证码</Button>
+                            </Col>
+                        </Row>
+                    </Form.Item>
 
-                <Form.Item>
-                    <Button type="primary" htmlType="submit">
-                        下一步
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">
+                            下一步
                     </Button>
-                </Form.Item>
-            </Form>
+                    </Form.Item>
+                </Form>
+            </div>
+
         )
     }
 }
