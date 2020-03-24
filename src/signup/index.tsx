@@ -85,9 +85,9 @@ class Signup extends React.Component<Props, State> {
         try {
             const resp = await axios.post(signup_url, body, { headers: signup_headers });
             localStorage.setItem("token", resp.data.token);
+            window.location.href = "https://console.mlflow.org.cn";
         } catch (error) {
             this.setState({ error_property: true })
-            console.log(error)
         }
     }
 
