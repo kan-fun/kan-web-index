@@ -11,6 +11,7 @@ import {
     Col,
     Alert
 } from 'antd';
+import Cookies from 'js-cookie'
 
 const ENDPOINT = "http://58b5dd3da8514f30a8dfbf42bb0a740c-cn-beijing.alicloudapi.com";
 const send_email_code_url = `${ENDPOINT}/send-email-code`;
@@ -84,7 +85,7 @@ class Signup extends React.Component<Props, State> {
 
         try {
             const resp = await axios.post(signup_url, body, { headers: signup_headers });
-            localStorage.setItem("token", resp.data.token);
+            Cookies.set('token', resp.data.token, { domain: '.mlflow.org.cn' })
             window.location.href = "https://console.mlflow.org.cn";
         } catch (error) {
             this.setState({ error_property: true })
